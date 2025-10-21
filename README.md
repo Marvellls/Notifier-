@@ -1,31 +1,33 @@
 # 📢 Moodle Assignment Discord Notifier Bot
 
-Discord bot yang secara otomatis scraping tugas dari website berbasis Moodle dan mengirim notifikasi ke Discord channel yang sesuai.
+> ⚠️ **Work in Progress**: Deadline extraction feature is currently under development and may not display correctly in all cases.
+
+A Discord bot that automatically scrapes assignments from Moodle-based websites and sends notifications to corresponding Discord channels.
 
 ## ✨ Features
 
-- 🔄 Auto-scraping tugas dari course pages
-- ⏰ Ekstraksi deadline otomatis dari deskripsi section
-- 🔒 Skip tugas yang terkunci (locked activities)
-- 📨 Kirim notifikasi ke Discord channel spesifik per course
-- 🕐 Scheduled task dengan cron job
-- 🔁 Retry logic untuk handle network timeout
-- 💾 Deduplication - tidak kirim notifikasi duplikat
+- 🔄 Auto-scraping assignments from course pages
+- ⏰ Automatic deadline extraction from section descriptions (⚠️ *In Progress*)
+- 🔒 Skip locked activities automatically
+- 📨 Send notifications to course-specific Discord channels
+- 🕐 Scheduled tasks with cron jobs
+- 🔁 Retry logic to handle network timeouts
+- 💾 Deduplication - prevents duplicate notifications
 
 ## 🚀 Setup
 
 ### Prerequisites
 
-- Node.js v14 atau lebih tinggi
+- Node.js v14 or higher
 - Discord Bot Token
-- Akun Moodle website
+- Moodle website account
 
 ### Installation
 
-1. Clone repository ini:
+1. Clone this repository:
 ```bash
-git clone <your-repo-url>
-cd Notifier
+git clone https://github.com/Marvellls/Notifier-.git
+cd Notifier-
 ```
 
 2. Install dependencies:
@@ -33,12 +35,12 @@ cd Notifier
 npm install
 ```
 
-3. Copy `.env.example` menjadi `.env`:
+3. Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
 
-4. Edit `.env` dan isi dengan credentials Anda:
+4. Edit `.env` and fill in your credentials:
 ```env
 BOT_TOKEN=your_discord_bot_token_here
 SERVER_ID=your_discord_server_id_here
@@ -48,9 +50,9 @@ WEBSITE_URL=https://your-website.com
 CRON_SCHEDULE=0 */1 * * *
 ```
 
-5. Edit `config.js` untuk menyesuaikan BASE_URL dengan website Moodle Anda
+5. Edit `config.js` to match your Moodle website BASE_URL
 
-6. Edit `event-scraper.js` untuk mengganti `COURSE_IDS` dengan course ID dari website Anda:
+6. Edit `event-scraper.js` to replace `COURSE_IDS` with your course IDs:
 ```javascript
 const COURSE_IDS = [
   { id: 29, name: 'Course Name 1' },
@@ -67,7 +69,7 @@ node run-bot.js
 ```
 
 ### Run with Cron (Auto-scheduled)
-Bot akan jalan otomatis sesuai `CRON_SCHEDULE` di `.env` (default: setiap jam)
+The bot will run automatically according to `CRON_SCHEDULE` in `.env` (default: every hour)
 
 ## 🏗️ Project Structure
 
@@ -88,7 +90,7 @@ Notifier/
 ## 🔧 Configuration
 
 ### Course IDs
-Edit `COURSE_IDS` di `event-scraper.js`:
+Edit `COURSE_IDS` in `event-scraper.js`:
 ```javascript
 const COURSE_IDS = [
   { id: YOUR_COURSE_ID, name: 'Your Course Name' },
@@ -96,41 +98,63 @@ const COURSE_IDS = [
 ```
 
 ### Discord Channels
-Bot otomatis routing notifikasi ke channel Discord berdasarkan nama course. Pastikan nama channel di Discord match dengan nama course (normalized: lowercase, no emoji/symbols).
+The bot automatically routes notifications to Discord channels based on course names. Make sure your Discord channel names match the course names (normalized: lowercase, no emoji/symbols).
 
-Contoh:
-- Course: "Organisasi Sistem Komputer" → Discord channel: `#organisasi-sistem-komputer`
-- Course: "Struktur Data" → Discord channel: `#struktur-data`
+Examples:
+- Course: "Computer Organization" → Discord channel: `#computer-organization`
+- Course: "Data Structures" → Discord channel: `#data-structures`
 
 ### Cron Schedule
-Edit `CRON_SCHEDULE` di `.env`:
-- `0 */1 * * *` - Setiap jam
-- `0 9,15,21 * * *` - Jam 9 pagi, 3 sore, 9 malam
-- `*/30 * * * *` - Setiap 30 menit
+Edit `CRON_SCHEDULE` in `.env`:
+- `0 */1 * * *` - Every hour
+- `0 9,15,21 * * *` - At 9 AM, 3 PM, 9 PM
+- `*/30 * * * *` - Every 30 minutes
 
 ## 🛠️ How It Works
 
-1. **Login**: Bot login ke Moodle website dengan credentials dari `.env`
-2. **Scraping**: Bot scraping setiap course page:
-   - Iterate melalui sections (TOPIK)
-   - Extract deadline dari deskripsi section
-   - Ambil semua activities dalam section
-   - Skip activities yang locked
-3. **Deduplication**: Compare dengan events sebelumnya (stored in `last-events.json`)
-4. **Notification**: Kirim ke Discord channel yang sesuai jika ada event baru
-5. **Repeat**: Ulangi sesuai cron schedule
+1. **Login**: Bot logs into Moodle website using credentials from `.env`
+2. **Scraping**: Bot scrapes each course page:
+   - Iterates through sections (TOPIK)
+   - Extracts deadlines from section descriptions (⚠️ *In Progress - may not work correctly*)
+   - Retrieves all activities within sections
+   - Skips locked activities
+3. **Deduplication**: Compares with previous events (stored in `last-events.json`)
+4. **Notification**: Sends to corresponding Discord channel if new events are found
+5. **Repeat**: Repeats according to cron schedule
 
-## 📝 Deadline Format
+## 📝 Deadline Format (⚠️ In Progress)
 
-Bot support 2 format deadline di deskripsi section:
+The bot attempts to support 2 deadline formats in section descriptions:
 1. `sampai DD Month YYYY jam HH:MM`
 2. `Tanggal selesai praktikum : DD Month YYYY jam HH:MM`
 
-Bot otomatis convert "jam" → "pukul" dan append "WIB" jika belum ada.
+The bot automatically converts "jam" → "pukul" and appends "WIB" if not present.
+
+**Note**: Deadline extraction is currently unreliable and may not display correctly in all cases.
+
+## 🚧 Known Issues
+
+- **Deadline Extraction**: Currently in progress and may not display correctly in Discord notifications
+- Some sections may show "Tidak tersedia" (Not available) for deadlines
+- Deadline format parsing needs improvement for various HTML structures
+
+## 🗺️ Roadmap
+
+- [ ] Improve deadline extraction reliability
+- [ ] Support more deadline formats
+- [ ] Add web dashboard for configuration
+- [ ] Multi-language support
+- [ ] Enhanced error handling and logging
 
 ## 🤝 Contributing
 
-Pull requests are welcome! For major changes, please open an issue first.
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+Areas that need improvement:
+- Deadline extraction logic
+- Error handling
+- Documentation
+- Testing
 
 ## 📄 License
 
@@ -138,4 +162,4 @@ MIT
 
 ## ⚠️ Disclaimer
 
-Bot ini dibuat untuk tujuan edukasi. Gunakan dengan bijak dan patuhi Terms of Service website yang di-scrape.
+This bot is created for educational purposes. Use responsibly and comply with the Terms of Service of the website being scraped.
